@@ -6,17 +6,19 @@ import {
 } from "recharts";
 import { LogOut, Sparkles, FileText, ShieldCheck } from "lucide-react";
 
+// ตั้งค่า Supabase & AI API จาก Environment Variables ของ Vercel
 const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
+  import.meta.env.VITE_SUPABASE_URL || "",
+  import.meta.env.VITE_SUPABASE_ANON_KEY || ""
 );
 
-const AI_API_URL = import.meta.env.VITE_AI_API_URL;
+const AI_API_URL = import.meta.env.VITE_AI_API_URL || "";
 
 type VrioRow = {
   v:number; r:number; i:number; o:number; g_growth:number; g_gravity:number; vrio6g_score:number;
 };
 
+// --- ส่วนที่ 1: หน้า Login ---
 function Login({ onSession }: { onSession: (s: Session|null)=>void }) {
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
@@ -38,7 +40,7 @@ function Login({ onSession }: { onSession: (s: Session|null)=>void }) {
   return <div className="page center">
     <div className="card login">
       <h1>AI Gravity Engine</h1>
-      <p>For Thai SMEs to IDE — Public SaaS Ready</p>
+      <p>For Thai Business to IDE — Public SaaS Ready</p>
       <input placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
       <input placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
       <button onClick={submit}>{mode === "login" ? "Login" : "Create Account"}</button>
@@ -50,6 +52,7 @@ function Login({ onSession }: { onSession: (s: Session|null)=>void }) {
   </div>
 }
 
+// --- ส่วนที่ 2: หน้า Dashboard หลัก ---
 function Dashboard({ session }: { session: Session }) {
   const [vrio,setVrio] = useState<VrioRow|null>(null);
   const [gravity,setGravity] = useState(10432);
@@ -146,16 +149,19 @@ function Dashboard({ session }: { session: Session }) {
       </div>
     </section>
 
-    <footer><ShieldCheck size={16}/> Multi-tenant Supabase SaaS Starter · RLS Ready</footer>
+    <footer><ShieldCheck size={16}/> Multi-tenant Supabase SaaS Starter · Law of UX/UI Design</footer>
   </div>
 }
 
+// --- ส่วนที่ 3: ตัวจัดการ State หลัก ---
 export default function App() {
   const [session,setSession] = useState<Session|null>(null);
+  
   useEffect(()=>{
     supabase.auth.getSession().then(({data})=>setSession(data.session));
     const { data: sub } = supabase.auth.onAuthStateChange((_e,s)=>setSession(s));
     return ()=>sub.subscription.unsubscribe();
   },[]);
+  
   return session ? <Dashboard session={session}/> : <Login onSession={setSession}/>;
 }
